@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מחשבון ADL פנימי</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;background:#f7fafc;color:#1f2937;margin:0;padding:0}
+.wrap{max-width:900px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:16px;margin-bottom:14px}
+h1{margin:0 0 8px;font-size:28px;color:#1f4e78}
+.notice{background:#fff2cc;border-right:5px solid #d4a017;padding:10px;border-radius:10px;margin:10px 0 16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-weight:700;margin-bottom:6px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;box-sizing:border-box}
+.table{display:grid;grid-template-columns:1.1fr 1.7fr 1fr;gap:10px;align-items:center}
+.row{padding:12px 0;border-bottom:1px solid #e5e7eb}
+.domain{font-weight:700}
+.small{color:#6b7280;font-size:14px}
+.scorebox{display:grid;grid-template-columns:1fr 2fr;gap:12px}
+.big{font-size:36px;font-weight:800;text-align:center;padding:20px;border-radius:14px;background:#e2f0d9}
+.status{padding:20px;border-radius:14px;background:#fff2cc;font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center}
+.footer{font-size:13px;color:#6b7280}
+@media (max-width:700px){.grid,.scorebox,.table{grid-template-columns:1fr}.small-hide{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>מחשבון ADL פנימי</h1>
+    <div class="notice">לשימוש פנימי בלבד. זהו אומדן עבודה לצוות ואינו מחליף הערכת ביטוח לאומי. יש למלא לפי התפקוד בפועל ביום-יום בזמן הביקור.</div>
+    <div class="grid">
+      <div><label>שם מטופל/ת</label><input type="text"></div>
+      <div><label>תאריך ביקור</label><input type="date"></div>
+      <div><label>שם מעריך/ה</label><input type="text"></div>
+      <div><label>מקור מידע</label><input type="text" placeholder="למשל: התרשמות ישירה / משפחה"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table small-hide" style="font-weight:700;color:#1f4e78">
+      <div>תחום</div><div>מה בודקים בפועל</div><div>בחירה</div>
+    </div>
+    <div id="rows"></div>
+  </div>
+
+  <div class="card scorebox">
+    <div id="total" class="big">0.0</div>
+    <div id="status" class="status">תלות נמוכה / ייתכן ללא זכאות</div>
+  </div>
+
+  <div class="card">
+    <label>הערה כללית</label>
+    <textarea rows="4" placeholder="כאן אפשר לתעד תנודתיות, החמרה או ממצא חשוב"></textarea>
+  </div>
+
+  <div class="footer">פירוש עבודה: 0–2.0 = תלות נמוכה | 2.5–4.5 = תלות קלה-בינונית | 5.0–6.5 = תלות בינונית-גבוהה | 7.0 ומעלה = תלות גבוהה.</div>
+</div>
+<script>
+const regular = [
+  {t:'עצמאי', s:0},
+  {t:'עזרה חלקית', s:0.5},
+  {t:'תלוי לגמרי', s:1}
+];
+const supervision = [
+  {t:'אין צורך', s:0},
+  {t:'צריך לעיתים', s:0.5},
+  {t:'צריך כל הזמן', s:1.5}
+];
+const items = [
+  ['ניידות בתוך הבית','האם מתנייד/ת בבית ללא עזרה פיזית', regular],
+  ['מעברים','מעבר מיטה/כיסא/קימה וישיבה', regular],
+  ['רחצה','רחצה מלאה כולל כניסה/יציאה ומקלחת בטוחה', regular],
+  ['לבוש','לבישה ופשיטה של בגדים תחתונים ועליונים', regular],
+  ['אכילה','אכילה בפועל לאחר הגשת המזון', regular],
+  ['שליטה על סוגרים','שליטה בפועל או צורך משמעותי בעזרה/החלפה', regular],
+  ['השגחה','צורך בהשגחה למניעת סיכון/בלבול/שיטוט', supervision]
+];
+const rows = document.getElementById('rows');
+items.forEach((item, idx) => {
+  const row = document.createElement('div');
+  row.className = 'row table';
+  const options = ['<option value="">בחר/י</option>'].concat(item[2].map(o => `<option value="${o.s}">${o.t}</option>`)).join('');
+  row.innerHTML = `
+    <div><div class="domain">${item[0]}</div></div>
+    <div class="small">${item[1]}<br>לפי התפקוד הרגיל ברוב ימות השבוע</div>
+    <div><select data-score="1">${options}</select></div>`;
+  rows.appendChild(row);
+});
+function update() {
+  let total = 0;
+  document.querySelectorAll('select[data-score]').forEach(s => {
+    total += parseFloat(s.value || 0);
+  });
+  total = Math.round(total * 10) / 10;
+  const totalEl = document.getElementById('total');
+  const statusEl = document.getElementById('status');
+  totalEl.textContent = total.toFixed(1);
+  let msg = '';
+  let color = '#e2f0d9';
+  if (total < 2.5) { msg = 'תלות נמוכה / ייתכן ללא זכאות'; color = '#e2f0d9'; }
+  else if (total < 5) { msg = 'תלות קלה-בינונית / נדרש בירור'; color = '#fff2cc'; }
+  else if (total < 7) { msg = 'תלות בינונית-גבוהה / סבירות לזכאות'; color = '#f4b183'; }
+  else { msg = 'תלות גבוהה / סבירות גבוהה לזכאות'; color = '#f4cccc'; }
+  totalEl.style.background = color;
+  statusEl.style.background = color;
+  statusEl.textContent = msg;
+}
+document.addEventListener('change', e => {
+  if (e.target.matches('select[data-score]')) update();
+});
+update();
+</script>
+</body>
+</html>
