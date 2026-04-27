@@ -3,112 +3,184 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>מחשבון ADL פנימי</title>
+<title>מחשבון ADL פנימי - מותאם לטופס מעודכן</title>
 <style>
 body{font-family:Arial,Helvetica,sans-serif;background:#f7fafc;color:#1f2937;margin:0;padding:0}
 .wrap{max-width:900px;margin:0 auto;padding:16px}
 .card{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:16px;margin-bottom:14px}
-h1{margin:0 0 8px;font-size:28px;color:#1f4e78}
+h1{margin:0 0 8px;font-size:26px;color:#1f4e78}
+h2{font-size:18px;color:#1f4e78;margin:8px 0 12px}
 .notice{background:#fff2cc;border-right:5px solid #d4a017;padding:10px;border-radius:10px;margin:10px 0 16px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 label{display:block;font-weight:700;margin-bottom:6px}
-input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;box-sizing:border-box}
-.table{display:grid;grid-template-columns:1.1fr 1.7fr 1fr;gap:10px;align-items:center}
+input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;box-sizing:border-box;background:#fff}
+.table{display:grid;grid-template-columns:1.05fr 1.75fr .9fr;gap:10px;align-items:center}
 .row{padding:12px 0;border-bottom:1px solid #e5e7eb}
 .domain{font-weight:700}
-.small{color:#6b7280;font-size:14px}
+.small{color:#6b7280;font-size:14px;line-height:1.35}
 .scorebox{display:grid;grid-template-columns:1fr 2fr;gap:12px}
 .big{font-size:36px;font-weight:800;text-align:center;padding:20px;border-radius:14px;background:#e2f0d9}
-.status{padding:20px;border-radius:14px;background:#fff2cc;font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center}
-.footer{font-size:13px;color:#6b7280}
-@media (max-width:700px){.grid,.scorebox,.table{grid-template-columns:1fr}.small-hide{display:none}}
+.status{padding:20px;border-radius:14px;background:#fff2cc;font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.35}
+.footer{font-size:13px;color:#6b7280;line-height:1.45}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{padding:12px;border:0;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer}
+.primary{background:#1f4e78;color:white}
+.secondary{background:#e5e7eb;color:#111827}
+.summary{white-space:pre-wrap;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px;min-height:90px;font-size:14px;line-height:1.5}
+@media (max-width:700px){.grid,.scorebox,.table,.btns{grid-template-columns:1fr}.small-hide{display:none}h1{font-size:23px}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
     <h1>מחשבון ADL פנימי</h1>
-    <div class="notice">לשימוש פנימי בלבד. זהו אומדן עבודה לצוות ואינו מחליף הערכת ביטוח לאומי. יש למלא לפי התפקוד בפועל ביום-יום בזמן הביקור.</div>
+    <div class="notice">
+      <b>לשימוש פנימי בלבד.</b><br>
+      כלי זה נועד להערכה ראשונית בלבד ואינו מהווה תחליף להערכת ביטוח לאומי או גורם מוסמך.
+      הכלי פותח על ידי צוות למידה ופיתוח ידע במטב, ומיועד לשימוש עובדי העמותה בלבד במסגרת עבודתם.
+      <b>אין להפיץ, לשתף או להעביר לגורמים חיצוניים.</b>
+    </div>
     <div class="grid">
-      <div><label>שם מטופל/ת</label><input type="text"></div>
-      <div><label>תאריך ביקור</label><input type="date"></div>
-      <div><label>שם מעריך/ה</label><input type="text"></div>
-      <div><label>מקור מידע</label><input type="text" placeholder="למשל: התרשמות ישירה / משפחה"></div>
+      <div><label>שם מטופל/ת</label><input id="patient" type="text"></div>
+      <div><label>תאריך ביקור</label><input id="date" type="date"></div>
+      <div><label>שם מעריך/ה</label><input id="assessor" type="text"></div>
+      <div><label>מקור מידע</label><input id="source" type="text" placeholder="למשל: התרשמות ישירה / משפחה"></div>
     </div>
   </div>
 
   <div class="card">
+    <h2>תחומי הערכה לפי הטופס המעודכן</h2>
     <div class="table small-hide" style="font-weight:700;color:#1f4e78">
       <div>תחום</div><div>מה בודקים בפועל</div><div>בחירה</div>
     </div>
     <div id="rows"></div>
   </div>
 
+  <div class="card">
+    <h2>תוספות / מצבים מיוחדים</h2>
+    <div class="table small-hide" style="font-weight:700;color:#1f4e78">
+      <div>סעיף</div><div>הסבר</div><div>בחירה</div>
+    </div>
+    <div id="extraRows"></div>
+  </div>
+
   <div class="card scorebox">
     <div id="total" class="big">0.0</div>
-    <div id="status" class="status">תלות נמוכה / ייתכן ללא זכאות</div>
+    <div id="status" class="status">טרם מולא / הערכת עבודה בלבד</div>
   </div>
 
   <div class="card">
     <label>הערה כללית</label>
-    <textarea rows="4" placeholder="כאן אפשר לתעד תנודתיות, החמרה או ממצא חשוב"></textarea>
+    <textarea id="note" rows="4" placeholder="כאן אפשר לתעד תנודתיות, החמרה, ממצא חשוב או הסתייגות מההערכה"></textarea>
   </div>
 
-  <div class="footer">פירוש עבודה: 0–2.0 = תלות נמוכה | 2.5–4.5 = תלות קלה-בינונית | 5.0–6.5 = תלות בינונית-גבוהה | 7.0 ומעלה = תלות גבוהה.</div>
+  <div class="card">
+    <div class="btns">
+      <button class="primary" onclick="makeSummary()">צור סיכום להעתקה</button>
+      <button class="secondary" onclick="copySummary()">העתק סיכום</button>
+    </div>
+    <div id="summary" class="summary">הסיכום יופיע כאן</div>
+  </div>
+
+  <div class="footer">
+    פירוש עבודה פנימי: הניקוד מחושב לפי בחירות העובד/ת בטופס זה בלבד ואינו קובע זכאות בפועל.
+    יש למלא לפי התפקוד בפועל ברוב ימות השבוע, ולא לפי יכולת תיאורטית.
+  </div>
 </div>
+
 <script>
-const regular = [
-  {t:'עצמאי', s:0},
-  {t:'עזרה חלקית', s:0.5},
-  {t:'תלוי לגמרי', s:1}
-];
-const supervision = [
-  {t:'אין צורך', s:0},
-  {t:'צריך לעיתים', s:0.5},
-  {t:'צריך כל הזמן', s:1.5}
-];
 const items = [
-  ['ניידות בתוך הבית','האם מתנייד/ת בבית ללא עזרה פיזית', regular],
-  ['מעברים','מעבר מיטה/כיסא/קימה וישיבה', regular],
-  ['רחצה','רחצה מלאה כולל כניסה/יציאה ומקלחת בטוחה', regular],
-  ['לבוש','לבישה ופשיטה של בגדים תחתונים ועליונים', regular],
-  ['אכילה','אכילה בפועל לאחר הגשת המזון', regular],
-  ['שליטה על סוגרים','שליטה בפועל או צורך משמעותי בעזרה/החלפה', regular],
-  ['השגחה','צורך בהשגחה למניעת סיכון/בלבול/שיטוט', supervision]
+  {domain:'ניידות בתוך הבית',desc:'ניידות בפועל בתוך הבית, שימוש באביזרי הליכה, צורך בעזרה או סיכון לנפילות.',opts:[
+    ['בחר/י', ''],['עצמאי/ת בניידות בתוך הבית, ללא עזרת כלים להליכה, בזמן סביר',0],['זקוק/ה להשגחה בעת ניידות עקב סיכון גבוה לנפילות חוזרות',0.5],['מתנייד/ת בעזרת אביזר מתאים או זקוק/ה לעזרה הולכת חלקית',1],['מתנייד/ת במאמץ ויש סיכון גבוה לנפילה / צורך משמעותי בעזרה',1.5],['זקוק/ה לעזרה מלאה של הזולת בניידות',2],['מרותק/ת לכיסא גלגלים וזקוק/ה לעזרה מלאה ברוב הפעולות',7]]},
+  {domain:'הלבשה',desc:'לבישה ופשיטה של בגדים, פריטי לבוש, אביזרים ופרוטזה לפי הצורך.',opts:[
+    ['בחר/י',''],['מתלבש/ת ללא עזרה',0],['זקוק/ה לסיוע בהכנת פריטי לבוש / אביזרים / השגחה',0.5],['זקוק/ה לעזרה חלקית בהלבשה',1],['זקוק/ה לעזרה מלאה בהרכבת פרוטזה / אביזרים אחרים',1],['זקוק/ה לעזרה מלאה של הזולת בהלבשה',1.5]]},
+  {domain:'רחצה',desc:'רחצה בפועל, הכנת תנאי הרחצה, השגחה, הסתבנות ורחצת כל חלקי הגוף.',opts:[
+    ['בחר/י',''],['מתרחץ/ת ללא עזרה',0],['זקוק/ה לסיוע בהכנת תנאי הרחצה / השגחה',0.5],['זקוק/ה לעזרה בחלק מפעולות הרחצה',1],['זקוק/ה לעזרה בכל פעולות הרחצה, כולל רחצת פנים וידיים',1.5]]},
+  {domain:'אכילה ושתייה',desc:'אכילה, שתייה, חימום/הגשה, חיתוך מזון, מזיגה והכנת שתייה.',opts:[
+    ['בחר/י',''],['אוכל/ת, שותה, מחמם/ת ומגיש/ה באופן עצמאי',0],['זקוק/ה לסיוע בחימום, הגשה, מזיגה/חיתוך המזון או הכנת שתייה',0.5],['זקוק/ה לעזרה חלקית באכילה / הכוונה משמעותית',1],['זקוק/ה לעזרה מלאה באכילה או בהזנה מלאכותית',2]]},
+  {domain:'הפרשות / סוגרים',desc:'שליטה בסוגרים, טיפול בהפרשות, שמירה על היגיינה אישית ושימוש בעזרים.',opts:[
+    ['בחר/י',''],['עצמאי/ת בטיפול בהפרשות ושמירה על היגיינה אישית',0],['אי שליטה בסוגרים וזקוק/ה להשגחה בניידות עקב סיכון לנפילות',0.5],['אי שליטה בסוגרים ומתנייד/ת במאמץ או זקוק/ה לעזרה חלקית בניידות',1],['זקוק/ה לעזרה מלאה בשמירה על היגיינה, הפרשות ועזרים',2]]}
 ];
-const rows = document.getElementById('rows');
-items.forEach((item, idx) => {
-  const row = document.createElement('div');
-  row.className = 'row table';
-  const options = ['<option value="">בחר/י</option>'].concat(item[2].map(o => `<option value="${o.s}">${o.t}</option>`)).join('');
-  row.innerHTML = `
-    <div><div class="domain">${item[0]}</div></div>
-    <div class="small">${item[1]}<br>לפי התפקוד הרגיל ברוב ימות השבוע</div>
-    <div><select data-score="1">${options}</select></div>`;
-  rows.appendChild(row);
-});
+
+const extras = [
+  {domain:'תוספת ניקוד לבודד',desc:'לסמן רק אם מתאים לפי הנהלים הפנימיים והטופס.',opts:[['לא רלוונטי',0],['כן - תוספת לבודד',0.5]]},
+  {domain:'השגחה על רקע קוגניטיבי / נפשי',desc:'סעיף מיוחד בטופס המעודכן. אין לסמן יחד כמה אפשרויות - לבחור את הרמה המתאימה ביותר.',opts:[
+    ['אין צורך בהשגחה מיוחדת',0],['זקוק/ה להשגחה חלקית על רקע דמנטי',4],['זקוק/ה להשגחה מתמדת - דמנטי / פסיכוגריאטרי / פסיכיאטרי',9],['זקוק/ה להשגחה מורכבת על רקע פסיכוגריאטרי / מצב רפואי מסכן חיים / תלות בזולת / מצב סופני',10]]},
+  {domain:'זכאות זמנית / מצב רפואי מיוחד',desc:'לסמן רק אם קיים מצב זמני רלוונטי לפי הטופס והנחיות הארגון.',opts:[
+    ['לא רלוונטי',0],['זמנית - ניקוד מינימלי 2.5',2.5],['זמנית - ניקוד 3.0',3],['זמנית - ניקוד 3.5',3.5]]}
+];
+
+function renderRows(targetId, arr, prefix) {
+  const target = document.getElementById(targetId);
+  arr.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'row table';
+    const options = item.opts.map(o => `<option value="${o[1]}">${o[0]}</option>`).join('');
+    row.innerHTML = `<div><div class="domain">${item.domain}</div></div><div class="small">${item.desc}<br>יש להעריך לפי התפקוד בפועל ברוב ימות השבוע.</div><div><select data-score="1" data-name="${item.domain}" id="${prefix}${idx}">${options}</select></div>`;
+    target.appendChild(row);
+  });
+}
+
+renderRows('rows', items, 'item');
+renderRows('extraRows', extras, 'extra');
+
 function update() {
   let total = 0;
-  document.querySelectorAll('select[data-score]').forEach(s => {
-    total += parseFloat(s.value || 0);
-  });
+  document.querySelectorAll('select[data-score]').forEach(s => total += parseFloat(s.value || 0));
   total = Math.round(total * 10) / 10;
   const totalEl = document.getElementById('total');
   const statusEl = document.getElementById('status');
   totalEl.textContent = total.toFixed(1);
-  let msg = '';
-  let color = '#e2f0d9';
-  if (total < 2.5) { msg = 'תלות נמוכה / ייתכן ללא זכאות'; color = '#e2f0d9'; }
-  else if (total < 5) { msg = 'תלות קלה-בינונית / נדרש בירור'; color = '#fff2cc'; }
-  else if (total < 7) { msg = 'תלות בינונית-גבוהה / סבירות לזכאות'; color = '#f4b183'; }
-  else { msg = 'תלות גבוהה / סבירות גבוהה לזכאות'; color = '#f4cccc'; }
+  let msg = '', color = '#e2f0d9';
+  if (total < 2.5) { msg = 'תלות נמוכה / ייתכן ללא זכאות - הערכת עבודה בלבד'; color = '#e2f0d9'; }
+  else if (total < 5) { msg = 'תלות קלה-בינונית / נדרש בירור - הערכת עבודה בלבד'; color = '#fff2cc'; }
+  else if (total < 7) { msg = 'תלות בינונית-גבוהה / סבירות לזכאות - הערכת עבודה בלבד'; color = '#f4b183'; }
+  else { msg = 'תלות גבוהה / סבירות גבוהה לזכאות - הערכת עבודה בלבד'; color = '#f4cccc'; }
   totalEl.style.background = color;
   statusEl.style.background = color;
   statusEl.textContent = msg;
 }
-document.addEventListener('change', e => {
-  if (e.target.matches('select[data-score]')) update();
-});
+document.addEventListener('change', e => { if (e.target.matches('select[data-score]')) update(); });
+
+function makeSummary(){
+  const patient = document.getElementById('patient').value || 'לא צוין';
+  const date = document.getElementById('date').value || 'לא צוין';
+  const assessor = document.getElementById('assessor').value || 'לא צוין';
+  const source = document.getElementById('source').value || 'לא צוין';
+  const total = document.getElementById('total').textContent;
+  const status = document.getElementById('status').textContent;
+  const lines = [];
+  document.querySelectorAll('select[data-score]').forEach(s => {
+    const name = s.getAttribute('data-name');
+    const chosen = s.options[s.selectedIndex].text;
+    const score = s.value || '0';
+    if (chosen && chosen !== 'בחר/י' && parseFloat(score || 0) !== 0) lines.push(`${name}: ${chosen} (${score})`);
+  });
+  const note = document.getElementById('note').value || '';
+  const text = `סיכום הערכת ADL פנימית
+שם מטופל/ת: ${patient}
+תאריך ביקור: ${date}
+מעריך/ה: ${assessor}
+מקור מידע: ${source}
+
+ניקוד משוער: ${total}
+פירוש: ${status}
+
+סעיפים עם ניקוד:
+${lines.length ? lines.join('\n') : 'לא סומנו סעיפים עם ניקוד.'}
+
+הערה כללית:
+${note}
+
+הבהרה: כלי פנימי להערכה ראשונית בלבד. אינו מחליף הערכת ביטוח לאומי או גורם מוסמך. אין להפיץ מחוץ לעמותה.`;
+  document.getElementById('summary').textContent = text;
+}
+async function copySummary(){
+  makeSummary();
+  const text = document.getElementById('summary').textContent;
+  try { await navigator.clipboard.writeText(text); alert('הסיכום הועתק'); }
+  catch(e) { alert('לא ניתן להעתיק אוטומטית. ניתן לסמן ולהעתיק ידנית.'); }
+}
 update();
 </script>
 </body>
